@@ -24,6 +24,7 @@ function mapExam(row) {
 
 export function createStudyRepository(client) {
   if (!client) return null;
+  const lessonIds = new Map();
 
   return {
     async ensureProfile(user) {
@@ -40,6 +41,69 @@ export function createStudyRepository(client) {
       if (classes.error) throw classes.error;
       if (exams.error) throw exams.error;
       return { timetable: (classes.data || []).map(mapClass), events: (exams.data || []).map(mapExam) };
+    },
+
+    async loadStudyProgress(userId, lessonSlugs) {
+      const lessons = await client.from("lessons").select("id,slug").in("slug", lessonSlugs);
+      if (lessons.error) throw lessons.error;
+      for (const lesson of lessons.data || []) lessonIds.set(lesson.slug, lesson.id);
+      const lessonIdList = (lessons.data || []).map((lesson) => lesson.id);
+      const [progressResult, xpResult, streakResult] = await Promise.all([
+        lessonIdList.length
+          ? client.from("lesson_progress").select("lesson_id,step_index,mastery,completed_at,answered_steps").eq("user_id", userId).in("lesson_id", lessonIdList)
+          : Promise.resolve({ data: [], error: null }),
+        client.from("xp_events").select("points").eq("user_id", userId),
+        client.from("streaks").select("current_days,longest_days,last_active_on,freeze_tokens,active_days_since_freeze").eq("user_id", userId).maybeSingle(),
+      ]);
+      if (progressResult.error) throw progressResult.error;
+      if (xpResult.error) throw xpResult.error;
+      if (streakResult.error) throw streakResult.error;
+      const slugById = new Map((lessons.data || []).map((lesson) => [lesson.id, lesson.slug]));
+      const progress = Object.fromEntries((progressResult.data || []).map((row) => [slugById.get(row.lesson_id), {
+        stepIndex: row.step_index, mastery: row.mastery, completed: Boolean(row.completed_at), answeredSteps: row.answered_steps || [],
+      }]));
+      return {
+        progress,
+        xp: (xpResult.data || []).reduce((total, row) => total + row.points, 0),
+        streakState: streakResult.data ? {
+          currentDays: streakResult.data.current_days, longestDays: streakResult.data.longest_days,
+          lastActiveOn: streakResult.data.last_active_on || "", freezeTokens: streakResult.data.freeze_tokens,
+          activeDaysSinceFreeze: streakResult.data.active_days_since_freeze,
+        } : { currentDays: 0, longestDays: 0, lastActiveOn: "", freezeTokens: 0, activeDaysSinceFreeze: 0 },
+      };
+    },
+
+    async saveLessonProgress(userId, { slug, stepIndex, mastery = 0, completed = false, answeredSteps = [] }) {
+      let lessonId = lessonIds.get(slug);
+      if (!lessonId) {
+        const { data, error } = await client.from("lessons").select("id").eq("slug", slug).single();
+        if (error) throw error;
+        lessonId = data.id;
+        lessonIds.set(slug, lessonId);
+      }
+      const timestamp = new Date().toISOString();
+      const row = {
+        user_id: userId, lesson_id: lessonId, step_index: stepIndex, mastery,
+        last_studied_at: timestamp, answered_steps: answeredSteps,
+      };
+      if (completed) row.completed_at = timestamp;
+      const { error } = await client.from("lesson_progress").upsert(row, { onConflict: "user_id,lesson_id" });
+      if (error) throw error;
+    },
+
+    async awardXp(reason, sourceId) {
+      const { data, error } = await client.rpc("award_study_xp", { p_reason: reason, p_source_id: sourceId });
+      if (error) throw error;
+      return Number(data || 0);
+    },
+
+    async saveStreak(userId, streakState) {
+      const { error } = await client.from("streaks").upsert({
+        user_id: userId, current_days: streakState.currentDays || 0, longest_days: streakState.longestDays || 0,
+        last_active_on: streakState.lastActiveOn || null, freeze_tokens: streakState.freezeTokens || 0,
+        active_days_since_freeze: streakState.activeDaysSinceFreeze || 0,
+      }, { onConflict: "user_id" });
+      if (error) throw error;
     },
 
     async saveClass(userId, entry) {

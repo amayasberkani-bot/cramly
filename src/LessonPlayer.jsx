@@ -20,14 +20,14 @@ function Drawing({ step, locale, title }) {
   </figure>;
 }
 
-export default function LessonPlayer({ lesson, locale = "ar", streak = 0, onCorrect, onComplete, onExit }) {
+export default function LessonPlayer({ lesson, locale = "ar", streak = 0, initialStep = 0, onProgress, onCorrect, onComplete, onExit }) {
   const ar = locale === "ar";
   const copy = ar ? {
     previous:"الخطوة السابقة", next:"الخطوة التالية", play:"متابعة الشرح", pause:"إيقاف مؤقت", replay:"أعد الخطوة", ask:"سؤال سريع", answer:"اختاري إجابة", wrong:"قريب! أعيدي قراءة الفكرة ثم حاولي مجدداً.", explain:"ما فهمتش", simpler:"تبسيط توضيحي من محتوى الدرس", speed:"سرعة الشرح", finish:"إنهاء الدرس", close:"العودة للمساحة", invalid:"تعذر عرض الدرس: محتوى الخطوات غير صالح.", complete:"أنهيتِ الدرس! +50 XP"
   } : {
     previous:"Étape précédente", next:"Étape suivante", play:"Reprendre la leçon", pause:"Mettre en pause", replay:"Rejouer l’étape", ask:"Question rapide", answer:"Choisis une réponse", wrong:"Presque ! Relis l’idée puis réessaie.", explain:"Je n’ai pas compris", simpler:"Explication simplifiée du contenu du cours", speed:"Vitesse", finish:"Terminer la leçon", close:"Retour à l’espace", invalid:"Impossible d’ouvrir la leçon : les étapes sont invalides.", complete:"Leçon terminée ! +50 XP"
   };
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(() => Math.max(0, Math.min(initialStep, (lesson?.steps?.length || 1) - 1)));
   const [choice, setChoice] = useState("");
   const [feedback, setFeedback] = useState("");
   const [simple, setSimple] = useState(false);
@@ -53,7 +53,7 @@ export default function LessonPlayer({ lesson, locale = "ar", streak = 0, onCorr
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [ar, lesson.steps.length]);
 
-  const changeStep = (next) => { setStepIndex(next); setChoice(""); setFeedback(""); setSimple(false); };
+  const changeStep = (next) => { setStepIndex(next); onProgress?.(lesson.id, next); setChoice(""); setFeedback(""); setSimple(false); };
   const checkAnswer = (optionId) => {
     setChoice(optionId);
     if (optionId === step.answerId) {

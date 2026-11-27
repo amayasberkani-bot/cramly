@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Bell, BookOpen, CalendarDays, Check, ChevronLeft,
   CircleHelp, Flame, GraduationCap, Home, Layers3, ListChecks, LogOut,
@@ -25,7 +25,7 @@ const text = {
 };
 
 const seed = {
-  xp: 240, streak: 4, done: false, answer: "", cardsDone: 0, saved: [], completedLessons: [], answeredSteps: [], xpEvents: [],
+  xp: 240, streak: 4, done: false, answer: "", cardsDone: 0, saved: [], completedLessons: [], answeredSteps: [], xpEvents: [], lessonProgress: {},
   streakState: { currentDays: 4, lastActiveOn: plannerDate.dayKey(plannerDate.addDays(new Date(), -1)), freezeTokens: 1, activeDaysSinceFreeze: 1 },
   timetable: [
     { id: "sample-class-1", module: "Biologie cellulaire", day: 2, startTime: "09:00", endTime: "10:30", type: "Cours" },
@@ -49,7 +49,7 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
   const [state, setState] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("cramly-demo-progress") || "{}");
-      return { ...seed, ...saved, completedLessons: saved.completedLessons || (saved.done ? [biologyLesson.id] : []), answeredSteps: saved.answeredSteps || [], xpEvents: saved.xpEvents || [] };
+      return { ...seed, ...saved, completedLessons: saved.completedLessons || (saved.done ? [biologyLesson.id] : []), answeredSteps: saved.answeredSteps || [], xpEvents: saved.xpEvents || [], lessonProgress: saved.lessonProgress || {} };
     }
     catch { return seed; }
   });
@@ -59,7 +59,7 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
   const [plannerBusy, setPlannerBusy] = useState(false);
   const [plannerFeedback, setPlannerFeedback] = useState("");
   const [plannerLoading, setPlannerLoading] = useState(Boolean(user?.id));
-  const studyRepository = createStudyRepository(supabase);
+  const studyRepository = useMemo(() => createStudyRepository(supabase), []);
   const authenticatedSessionId = useRef(user?.id || "");
   const pc = ar ? {
     addClass:"إضافة حصة", addExam:"إضافة امتحان", classTitle:"حصة أسبوعية", examTitle:"موعد امتحان", module:"المقياس", day:"اليوم", type:"النوع", start:"من", end:"إلى", room:"القاعة (اختياري)", date:"التاريخ", importance:"الأهمية", save:"حفظ", cancel:"إلغاء", classTypes:["Cours","TD","TP"], eventTypes:["Devoir / Contrôle","Examen","TP évalué","Rattrapage"], reminders:"تذكيرات مقترحة", noReminders:"لا توجد تذكيرات حالياً. أضيفي حصصك أو موعد امتحان لتخصيص اقتراحاتك.", review:"جلسة مراجعة", remove:"حذف", noEvents:"لا توجد امتحانات قادمة.", weekHint:"الأسبوع من السبت إلى الجمعة · بيانات تجريبية محفوظة على هذا الجهاز", today:"اليوم"
@@ -79,12 +79,21 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
     if (!user?.id || !studyRepository) { setPlannerLoading(false); return undefined; }
     let active = true;
     setPlannerLoading(true);
-    setState((current) => ({ ...current, xp: 0, streak: 0, done: false, answer: "", cardsDone: 0, saved: [], completedLessons: [], answeredSteps: [], xpEvents: [], streakState: { currentDays: 0, lastActiveOn: "", freezeTokens: 0, activeDaysSinceFreeze: 0 }, timetable: [], events: [], progress: [], plannerProfile: { ...seed.plannerProfile, streak: 0 } }));
+    setState((current) => ({ ...current, xp: 0, streak: 0, done: false, answer: "", cardsDone: 0, saved: [], completedLessons: [], answeredSteps: [], xpEvents: [], lessonProgress: {}, streakState: { currentDays: 0, lastActiveOn: "", freezeTokens: 0, activeDaysSinceFreeze: 0 }, timetable: [], events: [], progress: [], plannerProfile: { ...seed.plannerProfile, streak: 0 } }));
     (async () => {
       try {
         await studyRepository.ensureProfile(user);
-        const planner = await studyRepository.loadPlanner(user.id);
-        if (active) setState((current) => ({ ...current, timetable: planner.timetable, events: planner.events }));
+        const [planner, study] = await Promise.all([
+          studyRepository.loadPlanner(user.id),
+          studyRepository.loadStudyProgress(user.id, [biologyLesson.id, derivativeLesson.id]),
+        ]);
+        if (active) setState((current) => ({
+          ...current, timetable: planner.timetable, events: planner.events, xp: study.xp,
+          lessonProgress: study.progress, completedLessons: Object.entries(study.progress).filter(([, value]) => value.completed).map(([slug]) => slug),
+          answeredSteps: Object.values(study.progress).flatMap((value) => value.answeredSteps),
+          streakState: study.streakState, streak: study.streakState.currentDays,
+          plannerProfile: { ...current.plannerProfile, streak: study.streakState.currentDays },
+        }));
       } catch (error) {
         console.error("Cramly planner could not load", error);
         if (active) setPlannerFeedback(ar ? "تعذر تحميل جدولك. تحققي من اتصالك ثم أعيدي فتح التخطيط." : "Impossible de charger ton planning. Vérifie la connexion puis rouvre Planning.");
@@ -103,8 +112,19 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
   const awardLessonAnswer = (stepKey) => setState((current) => {
     const answered = current.answeredSteps || [];
     if (answered.includes(stepKey)) return current;
-    return awardStudyXp({ ...current, answeredSteps: [...answered, stepKey] }, "correct_answer", stepKey);
+    const next = awardStudyXp({ ...current, answeredSteps: [...answered, stepKey] }, "correct_answer", stepKey);
+    if (user?.id && studyRepository) {
+      const [slug, step] = stepKey.split(":");
+      void studyRepository.awardXp("correct_answer", stepKey).catch((error) => console.error("Cramly XP could not save", error));
+      void studyRepository.saveLessonProgress(user.id, { slug, stepIndex: Number(step), answeredSteps: [...answered, stepKey] }).catch((error) => console.error("Cramly lesson progress could not save", error));
+    }
+    return next;
   });
+  const saveLessonStep = (id, stepIndex) => {
+    if (!user?.id || !studyRepository) return;
+    const answeredSteps = state.answeredSteps || [];
+    void studyRepository.saveLessonProgress(user.id, { slug: id, stepIndex, answeredSteps: answeredSteps.filter((key) => key.startsWith(`${id}:`)) }).catch((error) => console.error("Cramly lesson progress could not save", error));
+  };
   const completeStudyLesson = (id) => setState((current) => {
     const completed = current.completedLessons || [];
     if (completed.includes(id)) return current;
@@ -113,6 +133,12 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
     const streakState = recordStudyDay(current.streakState || {}, new Date(), { lessonCompleted: true });
     next = { ...next, streakState, streak: streakState.currentDays };
     if (streakState.currentDays > 0 && streakState.currentDays % 7 === 0) next = awardStudyXp(next, "streak_7_days", String(streakState.currentDays));
+    if (user?.id && studyRepository) {
+      void studyRepository.awardXp("lesson_complete", id).catch((error) => console.error("Cramly XP could not save", error));
+      void studyRepository.saveLessonProgress(user.id, { slug: id, stepIndex: (id === biologyLesson.id ? biologyLesson : derivativeLesson).steps.length - 1, mastery: 100, completed: true, answeredSteps: (current.answeredSteps || []).filter((key) => key.startsWith(`${id}:`)) }).catch((error) => console.error("Cramly lesson progress could not save", error));
+      void studyRepository.saveStreak(user.id, streakState).catch((error) => console.error("Cramly streak could not save", error));
+      if (streakState.currentDays > 0 && streakState.currentDays % 7 === 0) void studyRepository.awardXp("streak_7_days", String(streakState.currentDays)).catch((error) => console.error("Cramly streak XP could not save", error));
+    }
     return next;
   });
   const weekStart = plannerDate.addDays(new Date(), -plannerDate.dayIndex(new Date()));
@@ -182,7 +208,7 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
         <article className="study-card study-mini-league"><div className="study-section-title"><div><span className="study-eyebrow">{c.leagueTitle}</span><h2>{c.rank}</h2></div><Trophy size={20}/></div><div className="study-league-dots"><span>🥇</span><span>🧑🏻‍🎓</span><span>🧑🏽‍🎓</span><span>🧑🏼‍🎓</span><button onClick={()=>setPage("league")}><ArrowLeft size={16}/></button></div></article></section>
     </>;
     if (page === "modules") return <><header className="study-page-head"><div><span className="study-eyebrow">{c.modulesTitle}</span><h1>{c.modules}</h1></div><button className="study-search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={c.search}/></button></header><div className="study-module-grid">{c.moduleNames.map((name,i)=>name.toLowerCase().includes(query.toLowerCase())&&<button className="study-module-card" key={name} onClick={()=>setPage("lessons")}><span className={`study-module-icon ${modulesMeta[i].color}`}>{modulesMeta[i].icon}</span><span><b>{name}</b><small>{i<2?"Semestre 1 · SNV":"Semestre 1 · Tronc commun"}</small></span><span className="study-mastery">{modulesMeta[i].mastery}%<small>{c.progress}</small></span><div className="study-progress"><i style={{width:`${modulesMeta[i].mastery}%`}}/></div><small>{c.allLessons} · {i === 0 ? 8 : 5}</small></button>)}</div></>;
-    if (page === "lesson") return <LessonPlayer lesson={lessonId===derivativeLesson.id?derivativeLesson:biologyLesson} locale={locale} streak={state.streak} onCorrect={awardLessonAnswer} onComplete={completeStudyLesson} onExit={()=>setPage("home")}/>;
+    if (page === "lesson") return <LessonPlayer lesson={lessonId===derivativeLesson.id?derivativeLesson:biologyLesson} locale={locale} streak={state.streak} initialStep={user?.id?state.lessonProgress?.[lessonId]?.stepIndex||0:0} onProgress={saveLessonStep} onCorrect={awardLessonAnswer} onComplete={completeStudyLesson} onExit={()=>setPage("home")}/>;
     if (page === "planner") return <>
       <header className="study-page-head"><div><span className="study-eyebrow">{pc.weekHint}</span><h1>{c.plannerTitle}</h1></div><div className="planner-actions"><button className="study-secondary" onClick={()=>setPlannerModal("exam")}><Plus size={15}/>{pc.addExam}</button><button className="study-primary" onClick={()=>setPlannerModal("class")}><Plus size={16}/>{pc.addClass}</button></div></header>
       {plannerFeedback&&<p className="planner-feedback" role="status">{plannerFeedback}</p>}{plannerLoading&&<p className="planner-empty" role="status">{ar?"جارٍ تحميل التخطيط…":"Chargement du planning…"}</p>}
