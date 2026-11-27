@@ -10,6 +10,7 @@ import FieldIssues from "./FieldIssues.jsx";
 import NotificationsCenter from "./NotificationsCenter.jsx";
 import ClientPortal from "./ClientPortal.jsx";
 import StudyWorkspace from "./StudyWorkspace.jsx";
+import CramlyAuth from "./CramlyAuth.jsx";
 import TimeClock from "./TimeClock.jsx";
 import ReportsCenter from "./ReportsCenter.jsx";
 import Procurement from "./Procurement.jsx";
@@ -147,7 +148,7 @@ export function App() {
     setPendingOps(queue.length);
   };
   const flushOfflineQueue = useCallback(async () => {
-    if (!user?.id || !supabase || !navigator.onLine) return;
+    if (!user?.id || !supabase || !navigator.onLine || page === "app") return;
     const queue = readOfflineQueue(user.id);
     if (!queue.length) { setPendingOps(0); return; }
     const remaining = [];
@@ -169,16 +170,16 @@ export function App() {
     saveOfflineQueue(user.id, remaining);
     setPendingOps(remaining.length);
     if (!remaining.length && queue.length) setToast(dependencySkipped ? (locale === "ar" ? "تمت المزامنة؛ لم يُحفظ ربط المهام لأن تحديث قاعدة البيانات لم يُطبق بعد." : locale === "fr" ? "Synchronisé ; la dépendance n’a pas été enregistrée car la migration manque." : "Synced; the task dependency was not saved because its database migration is pending.") : locale === "ar" ? "تمت مزامنة المسودات المحفوظة دون اتصال." : locale === "fr" ? "Les saisies hors ligne ont été synchronisées." : "Offline entries have synced.");
-  }, [user?.id, locale]);
+  }, [user?.id, locale, page]);
 
   useEffect(() => {
-    setPendingOps(user?.id ? readOfflineQueue(user.id).length : 0);
-    if (!user?.id) return undefined;
+    setPendingOps(user?.id && page !== "app" ? readOfflineQueue(user.id).length : 0);
+    if (!user?.id || page === "app") return undefined;
     const handleOnline = () => { void flushOfflineQueue(); };
     window.addEventListener("online", handleOnline);
     if (navigator.onLine) handleOnline();
     return () => window.removeEventListener("online", handleOnline);
-  }, [user?.id, flushOfflineQueue]);
+  }, [user?.id, flushOfflineQueue, page]);
 
   useEffect(() => { document.documentElement.lang = locale; document.documentElement.dir = rtl ? "rtl" : "ltr"; localStorage.setItem("cramly-locale", locale); }, [locale, rtl]);
   useEffect(() => {
@@ -200,7 +201,8 @@ export function App() {
   }, []);
   useEffect(() => { if (!user) localStorage.setItem("chantier-preview-data", JSON.stringify(data)); }, [data, user]);
   useEffect(() => {
-    if (!supabase || !user) return;
+    // The authenticated Cramly workspace has its own data model; never query the retired construction tables here.
+    if (!supabase || !user || page === "app") return;
     let alive = true;
     (async () => {
       try {
@@ -285,7 +287,7 @@ export function App() {
       }
     })();
     return () => { alive = false; };
-  }, [user, locale]);
+  }, [user, locale, page]);
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(""), 3200); return () => clearTimeout(id); }, [toast]);
   const projectName = (project) => project?.nameKey ? t[project.nameKey] : project?.name;
   const projects = data.projects;
@@ -381,11 +383,11 @@ export function App() {
   const navGroupCopy = locale === "ar" ? { primary: "التنقل", tools: "أدوات المشروع", team: "الفريق والإدارة", workspace: "مساحة العمل", manage: "إدارة الفريق", settings: "إعدادات المساحة", onlyWorkspace: "مساحة العمل الحالية", signOut: user ? "تسجيل الخروج" : "إنهاء جلسة العرض" } : locale === "fr" ? { primary: "Navigation", tools: "Outils du chantier", team: "Équipe et gestion", workspace: "Espace de travail", manage: "Gérer l’équipe", settings: "Paramètres de l’espace", onlyWorkspace: "Espace de travail actuel", signOut: user ? "Déconnexion" : "Quitter l’aperçu" } : { primary: "Navigation", tools: "Project tools", team: "Team & management", workspace: "Workspace", manage: "Manage team", settings: "Workspace settings", onlyWorkspace: "Current workspace", signOut: user ? "Sign out" : "Exit preview" };
   const renderNavItems = (items) => items.map(({ id, label, Icon }) => <button key={id} type="button" className={`side-link ${section === id ? "active" : ""}`} aria-current={section === id ? "page" : undefined} onClick={() => { setSection(id); setMobileNav(false); setWorkspaceMenuOpen(false); }}><Icon size={17} strokeWidth={1.8} /><span>{label}</span>{id === "tasks" && data.tasks.filter(x => x.status === "open").length > 0 && <em>{data.tasks.filter(x => x.status === "open").length}</em>}</button>);
 
-  if (page === "app") return <StudyWorkspace locale={locale} onSignOut={signOut} />;
+  if (page === "app") return <StudyWorkspace locale={locale} onSignOut={signOut} user={user} />;
   return <div className="site" id="top" dir={rtl ? "rtl" : "ltr"}>
     {page === "portal" && <ClientPortal locale={locale} token={portalToken} />}
     {page === "home" && <Home t={t} locale={locale} setLocale={changeLocale} onDemo={() => enterApp()} onAuth={(p) => { setPage(p); window.scrollTo(0, 0); }} onNav={() => setPrivacyOpen(true)} projects={projects} projectName={projectName} />}
-    {(page === "login" || page === "register") && <AuthPage t={t} locale={locale} setLocale={changeLocale} mode={page} invitePending={new URLSearchParams(window.location.search).has("invite")} onSwitchMode={() => setPage(page === "register" ? "login" : "register")} onBack={() => setPage("home")} onContinue={authenticate} />}
+    {(page === "login" || page === "register") && <CramlyAuth locale={locale} mode={page} onModeChange={() => setPage(page === "register" ? "login" : "register")} onBack={() => setPage("home")} onContinue={authenticate} />}
     {page === "app" && <div className="app-frame">
       <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
         <div className="sidebar-top"><Brand /><button className="icon-button mobile-close" aria-label={t.cancel} onClick={() => setMobileNav(false)}><X size={18} /></button></div>
@@ -583,7 +585,7 @@ function Home({ t, locale, setLocale, onDemo, onAuth, onNav }) {
       <RoleExplorer locale={locale} content={experience}/><TeamJourney locale={locale} onDemo={onDemo} content={experience}/>
       <section className="concept-proof" id="proof"><h2>{locale==="ar"?"كل أدوات المراجعة في مكان واحد":locale==="fr"?"Tous tes outils de révision au même endroit":"Every study tool, in one place"}</h2><p>{copy.operationSub}</p><div className="concept-proof-list">{proofItems.map(([Icon,label,ar,fr,en])=><button key={label} onClick={onDemo}><span className="concept-proof-icon"><Icon size={15}/></span><span><b>{label}</b><small>{locale==="ar"?ar:locale==="fr"?fr:en}</small></span><ArrowUpRight size={13}/></button>)}</div></section>
       <section className="concept-plans" id="pricing"><div className="concept-plans-intro"><span className="eyebrow"><span className="orange-dot"/>{copy.pricing}</span><h2>{copy.plansTitle}</h2><p>{copy.plansSub}</p></div><div className="concept-plan-grid">{planCards.map((plan)=><article className="concept-plan-card" key={plan.title}><span className="concept-plan-icon"><BriefcaseBusiness size={18}/></span><h3>{plan.title}</h3><p>{plan.desc}</p><button className="button concept-plan-button" onClick={()=>onAuth("register")}>{copy.planCta}<ArrowUpRight size={14}/></button><ul>{plan.items.map((item)=><li key={item}><Check size={13}/>{item}</li>)}</ul></article>)}</div></section><section className="concept-faq" id="faq"><div><h2>{copy.faqs.split(" ").slice(0,-1).join(" ")}<br/><em>{copy.faqs.split(" ").slice(-1).join("")}</em></h2><button className="concept-faq-all" onClick={()=>jump("contact")}>{locale==="ar"?"تواصل معنا":locale==="fr"?"Nous contacter":"Contact us"}<ArrowUpRight size={12}/></button></div><div className="concept-faq-list">{[[copy.q1,copy.a1],[copy.q2,copy.a2],[copy.q3,copy.a3],[copy.q4,copy.a4],[copy.q5,copy.a5]].map(([q,a])=><details key={q}><summary>{q}<Plus size={15}/></summary><p>{a}</p></details>)}</div></section>
-      <section className="concept-cta" id="contact"><div className="concept-cta-glow"/><div className="concept-wave concept-wave-cta" aria-hidden="true"/><div className="concept-wave concept-wave-cta-color" aria-hidden="true"/><div className="concept-cta-mark"><img src="/brand/zuzu-clean.svg" alt="CHANTI، مساعد CHANTIER IQ" width="128" height="128"/></div><h2>{copy.cta}</h2><p>{copy.cta2}</p><button className="button concept-cta-button" onClick={()=>onAuth("register")}>{copy.start}<ArrowUpRight size={14}/></button><div className="concept-footer-cols"><div><Brand/><p>{copy.footer}</p></div><div><b>{copy.product}</b><button onClick={()=>jump("features")}>{copy.features}</button><button onClick={()=>jump("how")}>{copy.solutions}</button></div><div><b>{copy.about}</b><button onClick={()=>jump("contact")}>{copy.login}</button><button onClick={onNav}>{t.terms}</button></div></div><small>© CHANTIER IQ · 2026</small></section>
+      <section className="concept-cta" id="contact"><div className="concept-cta-glow"/><div className="concept-wave concept-wave-cta" aria-hidden="true"/><div className="concept-wave concept-wave-cta-color" aria-hidden="true"/><div className="concept-cta-mark"><img src="/brand/zuzu-clean.svg" alt="Zuzu، رفيق المراجعة" width="128" height="128"/></div><h2>{copy.cta}</h2><p>{copy.cta2}</p><button className="button concept-cta-button" onClick={()=>onAuth("register")}>{copy.start}<ArrowUpRight size={14}/></button><div className="concept-footer-cols"><div><Brand/><p>{copy.footer}</p></div><div><b>{copy.product}</b><button onClick={()=>jump("features")}>{copy.features}</button><button onClick={()=>jump("how")}>{copy.solutions}</button></div><div><b>{copy.about}</b><button onClick={()=>jump("contact")}>{copy.login}</button><button onClick={onNav}>{t.terms}</button></div></div><small>© Cramly · 2026</small></section>
     </div></main></div>;
 }
 function Metric({ icon: Icon, label, value, note, color }) { return <div className="metric-card"><div className="metric-top"><span className={`metric-icon metric-${color}`}><Icon size={16}/></span><ArrowUpRight size={14} className="metric-arrow"/></div><small>{label}</small><strong>{value}</strong><span className="metric-note">{note}</span></div>; }
