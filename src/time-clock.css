@@ -1,0 +1,49 @@
+.time-clock{display:grid;gap:16px;min-width:0;color:#202329}
+.time-clock-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.time-clock-title{display:flex;align-items:center;gap:12px;min-width:0}
+.time-clock-title-icon{display:grid;width:42px;height:42px;flex:0 0 auto;place-items:center;border-radius:14px;background:#fff0e8;color:#d65d38}
+.time-clock-title h1{margin:0;font-size:clamp(20px,2.4vw,25px);line-height:1.35}
+.time-clock-title p{margin:4px 0 0;color:#767a80;font-size:12px;line-height:1.6}
+.time-clock-primary,.time-clock-secondary,.time-clock-export{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:0 13px;border:1px solid transparent;border-radius:11px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.time-clock-primary{background:#ff764a;color:#fff;box-shadow:0 5px 14px rgba(255,118,74,.16)}
+.time-clock-primary:hover{background:#ed6840}
+.time-clock-primary:disabled,.time-clock-export:disabled{opacity:.48;cursor:not-allowed}
+.time-clock-secondary{border-color:#e8e8e4;background:#fff;color:#5d6268}
+.time-clock-preview,.time-clock-message{padding:10px 12px;border:1px solid #eee7e0;border-radius:11px;background:#fff8f2;color:#77533f;font-size:11px;line-height:1.55}
+.time-clock-message.is-error{border-color:#f0d2cf;background:#fff4f2;color:#9e372f}
+.time-clock-message.is-success{border-color:#cee8dc;background:#f1faf5;color:#216947}
+.time-clock-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:17px;border:1px solid #ecebe7;border-radius:16px;background:#fff;box-shadow:0 8px 25px rgba(23,26,34,.04)}
+.time-clock-form label{display:grid;gap:6px;color:#53575d;font-size:11px;font-weight:700}
+.time-clock-form input,.time-clock-form select,.time-clock-form textarea,.time-clock-filter-group select{width:100%;min-width:0;min-height:39px;padding:8px 10px;border:1px solid #e4e4df;border-radius:10px;background:#fff;color:#24282d;font:inherit;font-size:12px;outline:none}
+.time-clock-form textarea{resize:vertical;line-height:1.55}
+.time-clock-form input:focus,.time-clock-form select:focus,.time-clock-form textarea:focus,.time-clock-filter-group select:focus{border-color:#f39a78;box-shadow:0 0 0 3px rgba(255,118,74,.12)}
+.time-clock-wide{grid-column:1/-1}
+.time-clock-form-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;padding-top:2px}
+.time-clock-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.time-clock-summary article{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;padding:14px 16px;border:1px solid #ecebe7;border-radius:15px;background:#fff}
+.time-clock-summary article>span{display:flex;align-items:center;gap:7px;color:#767a80;font-size:11px}
+.time-clock-summary article>span svg{color:#d7603b}
+.time-clock-summary article strong{grid-row:span 2;color:#22252a;font-size:24px;letter-spacing:-.03em}
+.time-clock-summary article small{color:#8a8d91;font-size:10px}
+.time-clock-panel{overflow:hidden;border:1px solid #ecebe7;border-radius:16px;background:#fff}
+.time-clock-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border-bottom:1px solid #efefec}
+.time-clock-filter-group{display:flex;align-items:center;gap:9px;min-width:0}
+.time-clock-filter-group select{width:auto;min-width:150px}
+.time-clock-period{display:flex;gap:4px;padding:3px;border-radius:10px;background:#f5f5f2}
+.time-clock-period button{min-height:30px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#777b80;font:inherit;font-size:10px;cursor:pointer}
+.time-clock-period button.selected{background:#fff;color:#bd5233;font-weight:750;box-shadow:0 1px 4px rgba(20,20,20,.08)}
+.time-clock-export{min-height:35px;border-color:#e8e8e4;background:#fff;color:#4e5359}
+.time-clock-table-wrap{overflow-x:auto}
+.time-clock-table{width:100%;border-collapse:collapse;text-align:start}
+.time-clock-table th,.time-clock-table td{padding:11px 13px;border-bottom:1px solid #f0f0ed;text-align:start;font-size:11px;vertical-align:top}
+.time-clock-table th{background:#fafaf8;color:#777b80;font-weight:700;white-space:nowrap}
+.time-clock-table td{color:#464a50;line-height:1.5}
+.time-clock-table tbody tr:last-child td{border-bottom:0}
+.time-clock-table td strong{color:#25282d}
+.time-clock-empty{display:flex;align-items:center;justify-content:center;gap:9px;min-height:105px;padding:20px;color:#85898d;font-size:12px}
+.time-clock-empty p{margin:0}
+.time-clock-spin{animation:time-clock-spin .9s linear infinite}
+@keyframes time-clock-spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.time-clock-form{grid-template-columns:repeat(2,minmax(0,1fr))}.time-clock-toolbar{align-items:stretch;flex-direction:column}.time-clock-filter-group{flex-wrap:wrap}.time-clock-export{align-self:flex-start}}
+@media(max-width:480px){.time-clock-heading{align-items:flex-start;flex-direction:column}.time-clock-heading>.time-clock-primary{align-self:stretch}.time-clock-form{grid-template-columns:1fr;padding:13px}.time-clock-wide,.time-clock-form-actions{grid-column:auto}.time-clock-summary{gap:8px}.time-clock-summary article{padding:12px}.time-clock-summary article strong{font-size:20px}.time-clock-filter-group{align-items:stretch;flex-direction:column}.time-clock-filter-group select{width:100%}}
+@media(prefers-reduced-motion:reduce){.time-clock-spin{animation:none}}

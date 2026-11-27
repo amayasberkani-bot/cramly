@@ -1,0 +1,53 @@
+.field-issues{display:grid;gap:18px;color:var(--ink,#171a22)}
+.field-issues-heading{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.field-issues-heading h1{margin:7px 0 4px;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.035em}
+.field-issues-heading p{margin:0;color:#777b80;font-size:13px;line-height:1.7}
+.field-issues-kicker{display:inline-flex;align-items:center;gap:7px;color:#ca5b37;font-size:11px;font-weight:750}
+.field-issues-primary,.field-issues-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 15px;border:0;border-radius:12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,opacity .16s ease}
+.field-issues-primary{color:#fff;background:linear-gradient(135deg,#ff9568,#f26640);box-shadow:0 6px 18px rgba(242,102,64,.17)}
+.field-issues-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 22px rgba(242,102,64,.23)}
+.field-issues-primary:disabled,.field-issue-actions button:disabled{opacity:.6;cursor:wait}
+.field-issues-secondary{border:1px solid #e8e8e5;color:#555b62;background:#fff}
+.field-issues-preview,.field-issues-readonly,.field-issues-notice,.field-issues-error{padding:11px 14px;border-radius:12px;font-size:12px;line-height:1.6}
+.field-issues-preview{color:#85552a;background:#fff6e7;border:1px solid #f2e5c8}
+.field-issues-readonly{color:#5b626b;background:#f3f4f5}
+.field-issues-notice{color:#14715c;background:#eaf8f1}
+.field-issues-error{color:#a3332c;background:#fff0ed}
+.field-issues-form{display:grid;gap:15px;padding:19px;border:1px solid #eee9e5;border-radius:18px;background:#fff;box-shadow:0 12px 30px rgba(23,26,34,.06)}
+.field-issues-form-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.field-issues-form-heading h2{margin:0;font-size:16px}
+.field-issues-close{display:grid;width:34px;height:34px;place-items:center;border:0;border-radius:10px;color:#777;background:#f6f6f4;cursor:pointer}
+.field-issues-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field-issues-form-grid label{display:grid;gap:6px;color:#4b5057;font-size:11px;font-weight:700}
+.field-issues-form-grid input,.field-issues-form-grid select,.field-issues-form-grid textarea{width:100%;min-width:0;min-height:40px;padding:9px 11px;border:1px solid #e4e4e0;border-radius:10px;background:#fff;color:#24282d;font:inherit;font-size:12px;outline:none}
+.field-issues-form-grid textarea{resize:vertical;line-height:1.6}
+.field-issues-form-grid input:focus,.field-issues-form-grid select:focus,.field-issues-form-grid textarea:focus{border-color:#f39a78;box-shadow:0 0 0 3px rgba(255,118,74,.12)}
+.field-issues-wide{grid-column:1/-1}
+.field-issues-form-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:3px}
+.field-issues-filters{display:flex;flex-wrap:wrap;gap:8px}
+.field-issues-filters button{min-height:35px;padding:0 13px;border:1px solid #e7e7e3;border-radius:999px;background:#fff;color:#62666b;font:inherit;font-size:11px;cursor:pointer}
+.field-issues-filters button.is-selected{border-color:#f1a080;background:#fff3ec;color:#bd4f2f;font-weight:750}
+.field-issues-list{display:grid;gap:10px}
+.field-issue-card{position:relative;display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:start;gap:12px;padding:15px;border:1px solid #ecece8;border-radius:16px;background:#fff;box-shadow:0 4px 15px rgba(23,26,34,.025)}
+.field-issue-icon{display:grid;width:36px;height:36px;place-items:center;border-radius:11px;color:#d45e3a;background:#fff0e8}
+.severity-critical .field-issue-icon{color:#b73730;background:#fff0ef}.severity-high .field-issue-icon{color:#cc5c35;background:#fff2e8}
+.field-issue-main{min-width:0}
+.field-issue-meta{display:flex;align-items:center;gap:8px;color:#878b90;font-size:10px;font-weight:650}
+.field-issue-severity{padding:3px 7px;border-radius:999px;background:#f5f5f3;color:#74787c}
+.field-issue-severity.sev-high,.field-issue-severity.sev-critical{background:#fff0e8;color:#b3442b}
+.field-issue-severity.sev-medium{background:#fff7e5;color:#9b6a17}
+.field-issue-main h2{margin:5px 0 3px;font-size:14px;line-height:1.5}
+.field-issue-main p{margin:0;color:#666b71;font-size:12px;line-height:1.65;white-space:pre-wrap}
+.field-issue-foot{display:flex;flex-wrap:wrap;gap:7px 13px;margin-top:9px;color:#8b8e91;font-size:10px}
+.field-issue-actions{display:grid;justify-items:end;gap:8px}
+.field-issue-status{padding:5px 9px;border-radius:999px;background:#f3f4f5;color:#62666d;font-size:10px;white-space:nowrap}
+.field-issue-status.status-open{background:#fff4e7;color:#9b6a17}.field-issue-status.status-in_progress{background:#eef4ff;color:#4565a1}.field-issue-status.status-resolved,.field-issue-status.status-verified{background:#eaf7f1;color:#23745b}
+.field-issue-actions button{display:inline-flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #efdfd7;border-radius:9px;background:#fffaf7;color:#bb5032;font:inherit;font-size:10px;font-weight:700;white-space:nowrap;cursor:pointer}
+.field-issue-overdue{position:absolute;inset-inline-start:15px;bottom:8px;color:#b54435;font-size:9px}
+.field-issues-empty{display:flex;min-height:150px;align-items:center;justify-content:center;gap:10px;padding:20px;border:1px dashed #e0e1dd;border-radius:16px;color:#85898d;font-size:12px;text-align:center}
+.field-issues-spin{animation:field-issues-spin .9s linear infinite}
+@keyframes field-issues-spin{to{transform:rotate(360deg)}}
+@media(max-width:680px){.field-issues-heading{align-items:flex-start;flex-direction:column}.field-issues-heading .field-issues-primary{width:100%}.field-issue-card{grid-template-columns:34px minmax(0,1fr);gap:10px;padding:13px}.field-issue-actions{grid-column:2;grid-row:2;display:flex;justify-content:space-between;justify-items:initial;align-items:center}.field-issue-overdue{position:static;grid-column:2;grid-row:3}.field-issues-form-grid{grid-template-columns:1fr}.field-issues-wide{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){.field-issues-primary,.field-issues-spin{animation:none;transition:none}}
+.field-issues-form label>span{display:flex;align-items:center;gap:6px}.field-issues-form input[type=file]{padding:8px;background:#fff}.field-issues-form label>small{color:#777;font-size:11px;overflow-wrap:anywhere}.field-issue-attachments{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.field-issue-attachments a,.field-issue-attachments span{display:inline-flex;padding:5px 8px;border:1px solid #eee2d9;border-radius:8px;background:#fff9f5;color:#80513c;font-size:10px;text-decoration:none;overflow-wrap:anywhere}.field-issue-pending{display:grid;gap:7px;margin-top:14px;padding:13px;border:1px dashed #e9b899;border-radius:12px;background:#fffaf6;color:#6e584a;font-size:11px}.field-issue-pending button{justify-self:start;display:flex;align-items:center;gap:6px;padding:7px 10px;border:0;border-radius:8px;background:#f1754e;color:#fff;font:inherit;cursor:pointer}
+.field-issues-checklist{display:grid;gap:8px;margin:0;padding:11px;border:1px solid #eee9e3;border-radius:10px}.field-issues-checklist legend{padding:0 5px;color:#666;font-size:11px}.field-issues-checklist label{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;gap:8px!important;color:#555!important;font-size:11px!important}.field-issues-checklist input{width:auto!important;accent-color:#eb7952}

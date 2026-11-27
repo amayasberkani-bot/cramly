@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap');
+
+:root {
+  --paper: #ffffff;
+  --canvas: #f7f9f2;
+  --ink: #14301f;
+  --muted: #536558;
+  --subtle: #718276;
+  --line: #e4ebdf;
+  --orange: #679c76;
+  --orange-dark: #3f7a52;
+  --orange-secondary: #b5cfae;
+  --orange-pale: #e6efe0;
+  --mint: #3f7a52;
+  --mint-pale: #e6efe0;
+  --navy: #14301f;
+  --blue: #4c8df6;
+  --blue-pale: #edf3ff;
+  --font-latin: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  --font-arabic: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+  --shadow: 0 16px 42px rgba(20, 48, 31, .07);
+  --shadow-brand: 0 10px 26px rgba(63, 122, 82, .2);
+  --gradient-brand: linear-gradient(135deg, #3f7a52 0%, #679c76 58%, #b5cfae 100%);
+  --brand-primary: #679c76;
+  --brand-secondary: #b5cfae;
+  --brand-deep-navy: #14301f;
+  --brand-teal: #3f7a52;
+  --brand-background: #f7f9f2;
+}
+
+body { background: var(--canvas); color: var(--ink); font-family: var(--font-arabic); }
+h1, h2, h3, h4, .brand { font-family: var(--font-latin), var(--font-arabic); }
+.brand { gap: 7px; color: var(--ink); letter-spacing: -.04em; font-size: 19px; }
+.brand > span:last-child { text-transform: lowercase; }
+.brand b { color: var(--ink); }
+.brand-mark { width: 33px; height: 33px; background: transparent; border-radius: 0; box-shadow: none; overflow: visible; }
+.brand-mark img { width: 33px; height: 33px; object-fit: contain; }
+.brand-print-mark { display: none; }
+.button-primary, .concept-start, .concept-dashboard, .concept-cta-button { background: #3f7a52; color: #fff; }
+.button-primary:hover, .concept-start:hover, .concept-dashboard:hover, .concept-cta-button:hover { background: #315f40; color: #fff; }
+.concept-page { color: var(--ink); background: var(--canvas); }
+.concept-hero { background: linear-gradient(140deg, #3f7a52 0%, #679c76 58%, #b5cfae 100%); }
+.concept-wave-hero, .concept-wave-hero-soft { filter: hue-rotate(70deg) saturate(.72); }
+.concept-glow-one, .concept-glow-two { opacity: .25; }
+.concept-cta { background: #1f3d2b; }
+.concept-cta-mark img { object-fit: contain; }
+.orange-dot, .concept-metric-dot, .concept-section-kicker > svg { background-color: #ff8a3d; color: #ff8a3d; }
+.concept-command-tags span { background: rgba(255,255,255,.18); }
+.side-link.active, .workspace-symbol { color: #3f7a52; background: #e6efe0; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

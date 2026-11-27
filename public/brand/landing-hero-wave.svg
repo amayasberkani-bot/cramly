@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 600" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="sunwash" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4ca" stop-opacity=".12"/>
+      <stop offset=".5" stop-color="#ffdb72" stop-opacity=".78"/>
+      <stop offset="1" stop-color="#fff9ef" stop-opacity=".96"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff5e1" stop-opacity=".24"/>
+      <stop offset=".36" stop-color="#fffaf1" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#sunwash)" d="M0 185 C190 190 285 320 505 338 C760 360 985 220 1168 184 C1270 164 1360 172 1440 190 L1440 600 L0 600Z"/>
+  <path fill="url(#paper)" d="M0 220 C190 238 292 365 535 382 C785 400 1000 274 1185 235 C1288 214 1372 215 1440 232 L1440 600 L0 600Z"/>
+</svg>

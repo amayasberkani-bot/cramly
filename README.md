@@ -24,4 +24,3 @@ The study workspace uses illustrative content and browser-local state. Completin
 ## Product work in progress
 
 The landing page keeps its existing section layout while replacing the construction product copy and brand with Cramly and Zuzu. The after-login preview is a local-only student workspace with a dashboard, module list, weekly planner, sample chalkboard lesson, flashcards, illustrative tutor response, community, league, and profile. A complete lesson schema, planner reminder engine, onboarding persistence, upload processing, and production database policies remain to be implemented.
-

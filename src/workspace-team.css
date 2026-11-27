@@ -1,0 +1,33 @@
+.workspace-team{display:grid;gap:18px}
+.workspace-team-heading{display:flex;align-items:flex-start;gap:12px}
+.workspace-team-heading h2{margin:0 0 5px;font-size:15px}
+.workspace-team-heading p,.workspace-team-signin p{margin:0;color:#777970;font-size:11px;line-height:1.75}
+.workspace-invite-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,1fr) auto;align-items:end;gap:12px}
+.workspace-invite-form label{display:grid;gap:6px;font-size:10px;color:#66685f}
+.workspace-invite-form input,.workspace-invite-form select,.workspace-invite-link input{min-width:0;height:39px;border:1px solid #e8e7e2;border-radius:10px;background:#fff;padding:0 11px;color:#282923;font:inherit;font-size:11px;outline:none}
+.workspace-invite-form input:focus,.workspace-invite-form select:focus,.workspace-invite-link input:focus{border-color:#f39b73;box-shadow:0 0 0 3px #f39b731c}
+.workspace-invite-form>.button{height:39px;white-space:nowrap}
+.workspace-invite-link{display:flex;gap:8px;padding:10px;border:1px solid #f1d8c9;border-radius:12px;background:#fffaf6}
+.workspace-invite-link input{flex:1;background:#fff}
+.workspace-invite-link .button{min-height:39px;white-space:nowrap}
+.workspace-team-message{margin:0;color:#9a5534;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+.workspace-members-heading{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #efeee9;padding-top:15px}
+.workspace-members-heading h3{margin:0;font-size:12px}
+.workspace-members-heading>span,.workspace-team-empty{margin:0;color:#8a8b84;font-size:10px}
+.workspace-member-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.workspace-member-list>li{display:flex;align-items:center;gap:10px;min-width:0;padding:10px;border:1px solid #f0efeb;border-radius:12px;background:#fff}
+.workspace-member-avatar{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:10px;background:#fff1e9;color:#e77948}
+.workspace-member-info{display:grid;min-width:0;flex:1;gap:3px}
+.workspace-member-info>b,.workspace-member-info>small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-member-info>b{font-size:11px;font-weight:600;color:#33342f}
+.workspace-member-info>small{font-size:9px;color:#85867f}
+.workspace-member-role{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#f4f4f1;color:#6c6d66;font-size:9px;white-space:nowrap}
+.workspace-member-role.role-owner{background:#fff2e9;color:#a65532}
+.workspace-member-role.role-editor{background:#eef5ff;color:#456c9b}
+.workspace-member-remove{display:grid;place-items:center;width:30px;height:30px;flex:none;border:0;border-radius:8px;background:transparent;color:#898a83;cursor:pointer}
+.workspace-member-remove:hover{background:#fff1ee;color:#b34e3e}
+.workspace-member-remove:focus-visible{outline:2px solid #f39b73;outline-offset:2px}
+.workspace-member-remove:disabled{opacity:.45;cursor:wait}
+.workspace-team-signin{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.auth-invite-note{margin:14px 0 0;padding:11px 12px;border:1px solid #f1d8c9;border-radius:11px;background:#fffaf6;color:#75452e;font-size:11px;line-height:1.75}
+@media(max-width:760px){.workspace-invite-form{grid-template-columns:1fr}.workspace-invite-form>.button{width:100%}.workspace-invite-link{flex-direction:column}.workspace-invite-link .button{width:100%}.workspace-member-role{font-size:8px;padding:5px 6px}}

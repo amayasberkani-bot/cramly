@@ -1,0 +1,50 @@
+.submittals-workspace{display:grid;gap:18px;min-width:0}
+.submittals-header{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.submittals-title{display:flex;align-items:center;gap:12px;min-width:0}
+.submittals-title-icon{display:grid;width:44px;height:44px;place-items:center;border-radius:14px;color:#cf5935;background:#fff0e8}
+.submittals-title h1{margin:0;color:#171a22;font-size:clamp(22px,2.5vw,30px);line-height:1.3}
+.submittals-title p{margin:5px 0 0;color:#777971;font-size:13px;line-height:1.6}
+.submittals-preview,.submittals-message{display:flex;align-items:center;gap:8px;margin:0;padding:11px 13px;border-radius:12px;font-size:13px;line-height:1.6}
+.submittals-preview{color:#8a562b;background:#fff6e8}
+.submittals-message.is-error{color:#9a3526;background:#fff0ec}
+.submittals-message.is-success{color:#176b52;background:#eaf8f1}
+.submittals-form,.submittal-dialog{padding:20px;border:1px solid #ecebe7;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(23,26,34,.06)}
+.submittals-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.submittals-form label,.submittal-dialog label{display:grid;gap:7px;color:#41434a;font-size:12px;font-weight:650}
+.submittals-form input,.submittals-form select,.submittals-form textarea,.submittal-dialog textarea{width:100%;min-width:0;padding:11px 12px;border:1px solid #e6e5e1;border-radius:11px;background:#fff;color:#22252a;font:inherit;font-weight:400;outline:none}
+.submittals-form input:focus,.submittals-form select:focus,.submittals-form textarea:focus,.submittal-dialog textarea:focus{border-color:#ff9a61;box-shadow:0 0 0 3px rgba(255,118,74,.14)}
+.submittals-form label small{color:#898982;font-size:11px;font-weight:400}
+.submittals-wide{grid-column:1/-1}
+.submittals-form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+.submittals-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin}
+.submittals-filters button{flex:0 0 auto;padding:8px 12px;border:1px solid #e9e8e4;border-radius:999px;background:#fff;color:#686a6c;font-size:11px;cursor:pointer}
+.submittals-filters button.is-selected{border-color:#ff9a61;color:#a94c2d;background:#fff4ef}
+.submittals-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.submittal-card{display:grid;align-content:start;gap:9px;min-width:0;padding:17px;border:1px solid #eae9e5;border-radius:16px;background:#fff;box-shadow:0 5px 20px rgba(23,26,34,.035)}
+.submittal-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.submittal-ref{color:#b94b2e;font-size:11px;font-weight:750;letter-spacing:.03em}
+.submittal-status{padding:5px 9px;border-radius:999px;background:#f2f2ef;color:#61636a;font-size:10px;font-weight:700}
+.submittal-status.status-approved{color:#176b52;background:#e9f7ef}
+.submittal-status.status-rejected,.submittal-status.status-cancelled{color:#9a3526;background:#fff0ec}
+.submittal-status.status-revise_resubmit{color:#8a562b;background:#fff6e8}
+.submittal-status.status-under_review{color:#305e9a;background:#edf4ff}
+.submittal-card h2{margin:0;color:#20232a;font-size:16px;line-height:1.5}
+.submittal-project,.submittal-description,.submittal-review-note{margin:0;color:#6b6e72;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.submittal-meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:#888983;font-size:10px}
+.submittal-review-note{padding:9px 10px;border-inline-start:3px solid #ff9a61;border-radius:7px;background:#fff8f4}
+.submittal-actions{display:flex;flex-wrap:wrap;gap:7px;padding-top:3px}
+.submittal-action{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #e9e8e4;border-radius:9px;background:#fff;color:#565960;font-size:11px;cursor:pointer}
+.submittal-action.approve{border-color:#cce9d7;color:#176b52;background:#f5fcf7}
+.submittal-action.reject{border-color:#f0d5cf;color:#a1392a;background:#fff8f6}
+.submittal-action.revise{border-color:#f1dfbf;color:#8a562b;background:#fffbf2}
+.submittals-empty{display:grid;justify-items:center;gap:12px;padding:34px 18px;border:1px dashed #e5e4df;border-radius:16px;color:#8a8b85;text-align:center}
+.submittals-empty p{margin:0;font-size:13px}
+.submittal-dialog-backdrop{position:fixed;z-index:90;inset:0;display:grid;place-items:center;padding:18px;background:rgba(23,26,34,.42)}
+.submittal-dialog{position:relative;width:min(100%,480px)}
+.submittal-dialog h2{margin:0 34px 6px 0;color:#171a22;font-size:19px}
+.submittal-dialog>p{margin:0 0 16px;color:#72747a;font-size:12px}
+.submittal-dialog-close{position:absolute;top:13px;inset-inline-end:13px;display:grid;width:34px;height:34px;place-items:center;border:0;border-radius:10px;background:#f4f4f1;color:#555;cursor:pointer}
+.submittals-spin{animation:submittals-rotate 1s linear infinite}
+@keyframes submittals-rotate{to{transform:rotate(360deg)}}
+@media(max-width:700px){.submittals-list{grid-template-columns:1fr}.submittals-header{align-items:flex-start;flex-direction:column}.submittals-form-grid{grid-template-columns:1fr}.submittals-wide{grid-column:auto}.submittals-form{padding:15px}.submittals-actions .button{min-height:40px}}
+@media(prefers-reduced-motion:reduce){.submittals-spin{animation:none}}
