@@ -73,26 +73,21 @@ export function createStudyRepository(client) {
       };
     },
 
-    async saveLessonProgress(userId, { slug, stepIndex, mastery = 0, completed = false, answeredSteps = [] }) {
-      let lessonId = lessonIds.get(slug);
-      if (!lessonId) {
-        const { data, error } = await client.from("lessons").select("id").eq("slug", slug).single();
-        if (error) throw error;
-        lessonId = data.id;
-        lessonIds.set(slug, lessonId);
-      }
-      const timestamp = new Date().toISOString();
-      const row = {
-        user_id: userId, lesson_id: lessonId, step_index: stepIndex, mastery,
-        last_studied_at: timestamp, answered_steps: answeredSteps,
-      };
-      if (completed) row.completed_at = timestamp;
-      const { error } = await client.from("lesson_progress").upsert(row, { onConflict: "user_id,lesson_id" });
+    async recordLessonStep(slug, stepIndex) {
+      const { error } = await client.rpc("record_study_lesson_step", { p_lesson_slug: slug, p_step_index: stepIndex });
       if (error) throw error;
     },
 
-    async awardXp(reason, sourceId) {
-      const { data, error } = await client.rpc("award_study_xp", { p_reason: reason, p_source_id: sourceId });
+    async submitLessonAnswer(slug, stepIndex, answerId) {
+      const { data, error } = await client.rpc("submit_study_lesson_answer", {
+        p_lesson_slug: slug, p_step_index: stepIndex, p_answer_id: answerId,
+      });
+      if (error) throw error;
+      return Number(data || 0);
+    },
+
+    async completeLesson(slug) {
+      const { data, error } = await client.rpc("complete_study_lesson", { p_lesson_slug: slug });
       if (error) throw error;
       return Number(data || 0);
     },

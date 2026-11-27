@@ -34,18 +34,15 @@ test("loads only mapped lesson progress and totals the user's XP events", async 
   assert.equal(loaded.streakState.currentDays, 3);
 });
 
-test("saves step progress and calls the server-side idempotent XP function", async () => {
-  const writes = [];
-  const client = {
-    from: () => ({ ...query({ data: { id: "db-bio" }, error: null }), upsert(row, options) { writes.push({ row, options }); return Promise.resolve({ error: null }); } }),
-    rpc: async (name, args) => ({ data: name === "award_study_xp" && args.p_reason === "correct_answer" ? 10 : 0, error: null }),
-  };
+test("uses server-verified procedures for step, answer, and lesson progress", async () => {
+  const calls = [];
+  const client = { rpc: async (name, args) => { calls.push({ name, args }); return { data: 10, error: null }; } };
   const repository = createStudyRepository(client);
-  await repository.saveLessonProgress("student-1", { slug: "biologie-cellulaire-organites", stepIndex: 4, answeredSteps: ["biology:3"] });
-  assert.equal(writes[0].row.lesson_id, "db-bio");
-  assert.equal(writes[0].row.step_index, 4);
-  assert.equal("completed_at" in writes[0].row, false);
-  assert.equal(await repository.awardXp("correct_answer", "biology:3"), 10);
+  await repository.recordLessonStep("biologie-cellulaire-organites", 4);
+  assert.equal(await repository.submitLessonAnswer("biologie-cellulaire-organites", 3, "membrane"), 10);
+  assert.equal(await repository.completeLesson("biologie-cellulaire-organites"), 10);
+  assert.deepEqual(calls.map((call) => call.name), ["record_study_lesson_step", "submit_study_lesson_answer", "complete_study_lesson"]);
+  assert.equal(calls[1].args.p_answer_id, "membrane");
 });
 
 function query(response) {

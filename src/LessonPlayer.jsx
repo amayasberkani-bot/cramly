@@ -23,9 +23,9 @@ function Drawing({ step, locale, title }) {
 export default function LessonPlayer({ lesson, locale = "ar", streak = 0, initialStep = 0, onProgress, onCorrect, onComplete, onExit }) {
   const ar = locale === "ar";
   const copy = ar ? {
-    previous:"الخطوة السابقة", next:"الخطوة التالية", play:"متابعة الشرح", pause:"إيقاف مؤقت", replay:"أعد الخطوة", ask:"سؤال سريع", answer:"اختاري إجابة", wrong:"قريب! أعيدي قراءة الفكرة ثم حاولي مجدداً.", explain:"ما فهمتش", simpler:"تبسيط توضيحي من محتوى الدرس", speed:"سرعة الشرح", finish:"إنهاء الدرس", close:"العودة للمساحة", invalid:"تعذر عرض الدرس: محتوى الخطوات غير صالح.", complete:"أنهيتِ الدرس! +50 XP"
+    previous:"الخطوة السابقة", next:"الخطوة التالية", play:"متابعة الشرح", pause:"إيقاف مؤقت", replay:"أعد الخطوة", ask:"سؤال سريع", answer:"اختاري إجابة", wrong:"قريب! أعيدي قراءة الفكرة ثم حاولي مجدداً.", saveError:"تعذر التحقق من الإجابة. تحققي من الاتصال ثم حاولي مجدداً.", completeError:"تعذر حفظ إكمال الدرس. تحققي من الاتصال ثم حاولي مجدداً.", explain:"ما فهمتش", simpler:"تبسيط توضيحي من محتوى الدرس", speed:"سرعة الشرح", finish:"إنهاء الدرس", close:"العودة للمساحة", invalid:"تعذر عرض الدرس: محتوى الخطوات غير صالح.", complete:"أنهيتِ الدرس! +50 XP"
   } : {
-    previous:"Étape précédente", next:"Étape suivante", play:"Reprendre la leçon", pause:"Mettre en pause", replay:"Rejouer l’étape", ask:"Question rapide", answer:"Choisis une réponse", wrong:"Presque ! Relis l’idée puis réessaie.", explain:"Je n’ai pas compris", simpler:"Explication simplifiée du contenu du cours", speed:"Vitesse", finish:"Terminer la leçon", close:"Retour à l’espace", invalid:"Impossible d’ouvrir la leçon : les étapes sont invalides.", complete:"Leçon terminée ! +50 XP"
+    previous:"Étape précédente", next:"Étape suivante", play:"Reprendre la leçon", pause:"Mettre en pause", replay:"Rejouer l’étape", ask:"Question rapide", answer:"Choisis une réponse", wrong:"Presque ! Relis l’idée puis réessaie.", saveError:"Impossible de vérifier la réponse. Vérifie la connexion et réessaie.", completeError:"Impossible d’enregistrer la leçon. Vérifie la connexion et réessaie.", explain:"Je n’ai pas compris", simpler:"Explication simplifiée du contenu du cours", speed:"Vitesse", finish:"Terminer la leçon", close:"Retour à l’espace", invalid:"Impossible d’ouvrir la leçon : les étapes sont invalides.", complete:"Leçon terminée ! +50 XP"
   };
   const [stepIndex, setStepIndex] = useState(() => Math.max(0, Math.min(initialStep, (lesson?.steps?.length || 1) - 1)));
   const [choice, setChoice] = useState("");
@@ -33,13 +33,15 @@ export default function LessonPlayer({ lesson, locale = "ar", streak = 0, initia
   const [simple, setSimple] = useState(false);
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState("1");
+  const [verifying, setVerifying] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const validation = useMemo(() => {
     try { assertValidLesson(lesson); return ""; }
     catch { return copy.invalid; }
   }, [lesson, copy.invalid]);
   const step = lesson?.steps?.[stepIndex];
   const isLast = stepIndex === (lesson?.steps?.length || 1) - 1;
-  const answerReady = step?.type !== "ask" || choice === step.answerId;
+  const answerReady = step?.type !== "ask" || choice === step.answerId && !verifying;
   const dir = ar ? "rtl" : "ltr";
 
   useEffect(() => {
@@ -54,17 +56,30 @@ export default function LessonPlayer({ lesson, locale = "ar", streak = 0, initia
   }, [ar, lesson.steps.length]);
 
   const changeStep = (next) => { setStepIndex(next); onProgress?.(lesson.id, next); setChoice(""); setFeedback(""); setSimple(false); };
-  const checkAnswer = (optionId) => {
+  const checkAnswer = async (optionId) => {
     setChoice(optionId);
     if (optionId === step.answerId) {
-      setFeedback(ar ? step.correctText.ar : step.correctText.fr);
-      onCorrect?.(`${lesson.id}:${stepIndex}`);
+      setVerifying(true);
+      try {
+        await onCorrect?.(`${lesson.id}:${stepIndex}`, optionId);
+        setFeedback(ar ? step.correctText.ar : step.correctText.fr);
+      } catch {
+        setChoice("");
+        setFeedback(copy.saveError);
+      } finally {
+        setVerifying(false);
+      }
     } else {
       setFeedback(ar ? step.wrongText.ar : step.wrongText.fr);
     }
   };
-  const next = () => {
-    if (isLast) { onComplete?.(lesson.id); onExit?.(); return; }
+  const next = async () => {
+    if (isLast) {
+      setCompleting(true);
+      try { await onComplete?.(lesson.id); onExit?.(); }
+      catch { setFeedback(copy.completeError); setCompleting(false); }
+      return;
+    }
     changeStep(Math.min(stepIndex + 1, lesson.steps.length - 1));
   };
 
@@ -85,7 +100,7 @@ export default function LessonPlayer({ lesson, locale = "ar", streak = 0, initia
         {text&&<p>{text}</p>}
       </div>}
       {simple&&<div className="lesson-simpler lesson-animate" role="status"><b>{copy.simpler}</b><p>{ar?"خذي الفكرة جزءاً جزءاً، وتأكدي من معنى المصطلح الفرنسي داخل السياق.":"Reprends l’idée en petites parties et relie le terme scientifique à sa définition dans le cours."}</p></div>}
-      <div className="lesson-board-controls"><button className="study-icon-button" onClick={()=>changeStep(Math.max(0,stepIndex-1))} disabled={stepIndex===0} aria-label={copy.previous}>{ar?<ArrowRight size={16}/>:<ArrowLeft size={16}/>}</button><button className="study-icon-button" onClick={()=>{setChoice("");setFeedback("");setSimple(false)}} aria-label={copy.replay}><RotateCcw size={15}/></button><button className="study-icon-button" onClick={()=>setPaused((value)=>!value)} aria-label={paused?copy.play:copy.pause}>{paused?<Play size={16}/>:<Pause size={16}/>}</button><button className="lesson-simple-button" onClick={()=>setSimple((value)=>!value)}>{copy.explain}</button><button className="study-primary" onClick={next} disabled={!answerReady}>{isLast?copy.finish:copy.next}{ar?<ArrowLeft size={15}/>:<ArrowRight size={15}/>}</button></div>
+      <div className="lesson-board-controls"><button className="study-icon-button" onClick={()=>changeStep(Math.max(0,stepIndex-1))} disabled={stepIndex===0||verifying||completing} aria-label={copy.previous}>{ar?<ArrowRight size={16}/>:<ArrowLeft size={16}/>}</button><button className="study-icon-button" onClick={()=>{setChoice("");setFeedback("");setSimple(false)}} aria-label={copy.replay} disabled={verifying||completing}><RotateCcw size={15}/></button><button className="study-icon-button" onClick={()=>setPaused((value)=>!value)} aria-label={paused?copy.play:copy.pause} disabled={completing}>{paused?<Play size={16}/>:<Pause size={16}/>}</button><button className="lesson-simple-button" onClick={()=>setSimple((value)=>!value)} disabled={completing}>{copy.explain}</button><button className="study-primary" onClick={next} disabled={!answerReady||completing}>{completing?copy.complete:isLast?copy.finish:copy.next}{ar?<ArrowLeft size={15}/>:<ArrowRight size={15}/>}</button></div>
     </article><aside className="lesson-zuzu-aside"><Zuzu pose={step?.type === "ask" ? "thinking" : step?.type === "celebrate" ? "celebrating" : "writing-on-board"} streak={streak}/><p>{step?.type === "ask" ? copy.answer : ar?"خذي وقتك، خطوة بخطوة!":"À ton rythme, une étape à la fois."}</p></aside></div>
   </section>;
 }

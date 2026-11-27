@@ -109,38 +109,38 @@ export default function StudyWorkspace({ locale = "ar", onSignOut, user = null }
     ["lessons",BookOpen,c.lessons], ["review",ListChecks,c.review], ["tutor",MessageCircle,c.tutor],
     ["community",GraduationCap,c.community], ["league",Trophy,c.league], ["profile",UserRound,c.profile],
   ];
-  const awardLessonAnswer = (stepKey) => setState((current) => {
-    const answered = current.answeredSteps || [];
-    if (answered.includes(stepKey)) return current;
-    const next = awardStudyXp({ ...current, answeredSteps: [...answered, stepKey] }, "correct_answer", stepKey);
+  const awardLessonAnswer = async (stepKey, answerId) => {
+    const answered = state.answeredSteps || [];
+    if (answered.includes(stepKey)) return;
     if (user?.id && studyRepository) {
       const [slug, step] = stepKey.split(":");
-      void studyRepository.awardXp("correct_answer", stepKey).catch((error) => console.error("Cramly XP could not save", error));
-      void studyRepository.saveLessonProgress(user.id, { slug, stepIndex: Number(step), answeredSteps: [...answered, stepKey] }).catch((error) => console.error("Cramly lesson progress could not save", error));
+      await studyRepository.submitLessonAnswer(slug, Number(step), answerId);
     }
-    return next;
-  });
+    setState((current) => {
+      const currentAnswered = current.answeredSteps || [];
+      if (currentAnswered.includes(stepKey)) return current;
+      return awardStudyXp({ ...current, answeredSteps: [...currentAnswered, stepKey] }, "correct_answer", stepKey);
+    });
+  };
   const saveLessonStep = (id, stepIndex) => {
     if (!user?.id || !studyRepository) return;
-    const answeredSteps = state.answeredSteps || [];
-    void studyRepository.saveLessonProgress(user.id, { slug: id, stepIndex, answeredSteps: answeredSteps.filter((key) => key.startsWith(`${id}:`)) }).catch((error) => console.error("Cramly lesson progress could not save", error));
+    void studyRepository.recordLessonStep(id, stepIndex).catch((error) => console.error("Cramly lesson progress could not save", error));
   };
-  const completeStudyLesson = (id) => setState((current) => {
-    const completed = current.completedLessons || [];
-    if (completed.includes(id)) return current;
-    const nextCompleted = [...completed, id];
-    let next = awardStudyXp({ ...current, done: nextCompleted.includes(biologyLesson.id), completedLessons: nextCompleted }, "lesson_complete", id);
-    const streakState = recordStudyDay(current.streakState || {}, new Date(), { lessonCompleted: true });
-    next = { ...next, streakState, streak: streakState.currentDays };
-    if (streakState.currentDays > 0 && streakState.currentDays % 7 === 0) next = awardStudyXp(next, "streak_7_days", String(streakState.currentDays));
-    if (user?.id && studyRepository) {
-      void studyRepository.awardXp("lesson_complete", id).catch((error) => console.error("Cramly XP could not save", error));
-      void studyRepository.saveLessonProgress(user.id, { slug: id, stepIndex: (id === biologyLesson.id ? biologyLesson : derivativeLesson).steps.length - 1, mastery: 100, completed: true, answeredSteps: (current.answeredSteps || []).filter((key) => key.startsWith(`${id}:`)) }).catch((error) => console.error("Cramly lesson progress could not save", error));
-      void studyRepository.saveStreak(user.id, streakState).catch((error) => console.error("Cramly streak could not save", error));
-      if (streakState.currentDays > 0 && streakState.currentDays % 7 === 0) void studyRepository.awardXp("streak_7_days", String(streakState.currentDays)).catch((error) => console.error("Cramly streak XP could not save", error));
-    }
-    return next;
-  });
+  const completeStudyLesson = async (id) => {
+    if ((state.completedLessons || []).includes(id)) return;
+    if (user?.id && studyRepository) await studyRepository.completeLesson(id);
+    const streakState = recordStudyDay(state.streakState || {}, new Date(), { lessonCompleted: true });
+    if (user?.id && studyRepository) await studyRepository.saveStreak(user.id, streakState);
+    setState((current) => {
+      const completed = current.completedLessons || [];
+      if (completed.includes(id)) return current;
+      const nextCompleted = [...completed, id];
+      let next = awardStudyXp({ ...current, done: nextCompleted.includes(biologyLesson.id), completedLessons: nextCompleted }, "lesson_complete", id);
+      next = { ...next, streakState, streak: streakState.currentDays };
+      if (streakState.currentDays > 0 && streakState.currentDays % 7 === 0 && !user?.id) next = awardStudyXp(next, "streak_7_days", String(streakState.currentDays));
+      return next;
+    });
+  };
   const weekStart = plannerDate.addDays(new Date(), -plannerDate.dayIndex(new Date()));
   const reminderSuggestions = planReminders({ ...state.plannerProfile, locale: ar ? "ar" : "fr", streak: state.streak }, state.timetable || [], state.events || [], state.progress || [], new Date());
   const level = getStudyLevel(state.xp, ar ? "ar" : "fr");
