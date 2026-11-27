@@ -7,6 +7,7 @@
   --muted: #536558;
   --subtle: #718276;
   --line: #e4ebdf;
+  /* Legacy component aliases now point to Cramly's Zuzu green palette. */
   --orange: #679c76;
   --orange-dark: #3f7a52;
   --orange-secondary: #b5cfae;
@@ -40,13 +41,53 @@ h1, h2, h3, h4, .brand { font-family: var(--font-latin), var(--font-arabic); }
 .button-primary:hover, .concept-start:hover, .concept-dashboard:hover, .concept-cta-button:hover { background: #315f40; color: #fff; }
 .concept-page { color: var(--ink); background: var(--canvas); }
 .concept-hero { background: linear-gradient(140deg, #3f7a52 0%, #679c76 58%, #b5cfae 100%); }
-.concept-wave-hero, .concept-wave-hero-soft { filter: hue-rotate(70deg) saturate(.72); }
+.concept-wave-hero, .concept-wave-hero-soft { background-image: none !important; filter: none; opacity: 0; }
 .concept-glow-one, .concept-glow-two { opacity: .25; }
 .concept-cta { background: #1f3d2b; }
 .concept-cta-mark img { object-fit: contain; }
-.orange-dot, .concept-metric-dot, .concept-section-kicker > svg { background-color: #ff8a3d; color: #ff8a3d; }
+.orange-dot, .concept-metric-dot, .concept-section-kicker > svg { background-color: #679c76; color: #3f7a52; }
 .concept-command-tags span { background: rgba(255,255,255,.18); }
 .side-link.active, .workspace-symbol { color: #3f7a52; background: #e6efe0; }
+
+/* Cramly's study product replaces the former construction palette throughout. */
+.concept-hero { background: linear-gradient(180deg, #315f40 0%, #3f7a52 58%, #679c76 100%) !important; }
+.concept-hero-copy h1 { color: #fff; text-shadow: 0 2px 20px rgba(20,48,31,.2); }
+.concept-hero-copy>p { color: rgba(255,255,255,.96); text-shadow: 0 1px 10px rgba(20,48,31,.18); }
+.concept-page { background: var(--canvas); }
+.concept-hero::before, .concept-hero::after { display: none; }
+.concept-glow-one { background: #b5cfae; }
+.concept-glow-two { background: #679c76; }
+.concept-command { box-shadow: 0 16px 44px rgba(35, 83, 49, .16); }
+.concept-command > button { background: var(--gradient-brand); }
+.concept-intro { background: radial-gradient(ellipse at 50% 100%, #e6efe0 0, transparent 45%), #fff; }
+.concept-intro-copy h2 em, .concept-plans-intro > .eyebrow, .concept-faq h2 em { color: var(--orange-dark); }
+.concept-metric-dot { background: #679c76; box-shadow: 0 0 0 4px rgba(103,156,118,.16); }
+.concept-workflow, .concept-plans { background: linear-gradient(180deg, #fff, #f7f9f2); }
+.concept-flow-cards button svg:first-child, .concept-proof-icon, .concept-plan-icon { color: var(--orange-dark); }
+.concept-proof-icon, .concept-plan-icon { background: var(--orange-pale); }
+.concept-proof-list button:hover { border-color: #b5cfae; box-shadow: 0 7px 20px rgba(63,122,82,.10); }
+.concept-plan-button { border-color: #b5cfae; color: #315f40; background: #f3f8f0; }
+.concept-plan-card li svg { color: var(--orange-dark); }
+.concept-cta { background: #1f3d2b; }
+.concept-page .concept-cta { background: radial-gradient(ellipse at 54% 82%, rgba(181,207,174,.32), transparent 47%), radial-gradient(ellipse at 90% 108%, rgba(63,122,82,.42), transparent 52%), linear-gradient(155deg, #315f40 0%, #1f3d2b 62%, #14301f 100%); }
+.concept-wave-cta, .concept-wave-cta-color { filter: hue-rotate(70deg) saturate(.62); }
+.concept-cta-mark img { object-fit: contain; }
+.concept-page .concept-start { background: #fff; border-color: #fff; color: #315f40; }
+.concept-page .concept-start:hover { background: #f0f6ec; }
+.concept-page .concept-dashboard { color: #315f40; }
+.concept-page .concept-section-kicker svg { color: var(--orange-dark); }
+.concept-page .concept-nav, .concept-page .concept-nav.is-scrolled { background: rgba(20,48,31,.96); border-color: rgba(255,255,255,.12); }
+.concept-page .concept-nav .brand, .concept-page .concept-nav .brand b,
+.concept-page .concept-nav nav button, .concept-page .concept-nav .plain-button,
+.concept-page .concept-nav .language-select, .concept-page .concept-nav .language-select select { color: #fff; }
+.concept-page .concept-nav .concept-start { color: #315f40; background: #fff; border-color: #fff; }
+.concept-page .concept-nav.is-scrolled nav button.is-current { color: #fff; background: rgba(255,255,255,.18); }
+.concept-page .concept-nav.is-scrolled .concept-dashboard { color: #fff; background: #3f7a52; }
+.study-app .study-sidebar nav em { background: #679c76; }
+.study-app .study-revision { background: #e6efe0; color: #315f40; }
+.study-app .study-progress i { background: var(--gradient-brand); }
+.study-app .study-module-icon.orange { color: #3f7a52; background: #e6efe0; }
+.cramly-auth { --auth-accent: #3f7a52; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
