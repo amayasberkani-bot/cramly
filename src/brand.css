@@ -41,7 +41,8 @@ h1, h2, h3, h4, .brand { font-family: var(--font-latin), var(--font-arabic); }
 .button-primary:hover, .concept-start:hover, .concept-dashboard:hover, .concept-cta-button:hover { background: #315f40; color: #fff; }
 .concept-page { color: var(--ink); background: var(--canvas); }
 .concept-hero { background: linear-gradient(140deg, #3f7a52 0%, #679c76 58%, #b5cfae 100%); }
-.concept-wave-hero, .concept-wave-hero-soft { background-image: none !important; filter: none; opacity: 0; }
+.concept-wave-hero { background-image: url('/brand/landing-hero-wave.svg'); opacity: .72; }
+.concept-wave-hero-soft { background-image: url('/brand/landing-hero-wave.svg'); opacity: .28; }
 .concept-glow-one, .concept-glow-two { opacity: .25; }
 .concept-cta { background: #1f3d2b; }
 .concept-cta-mark img { object-fit: contain; }
